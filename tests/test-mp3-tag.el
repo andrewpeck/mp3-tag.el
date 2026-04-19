@@ -42,9 +42,12 @@
 
 (ert-deftest mp3-tag-read-file-includes-filename ()
   "Check `mp3-tag-read-file' adds FILE to the returned alist."
-  (cl-letf (((symbol-function 'mp3-tag--read-json-with-mutagen)
+  (cl-letf (((symbol-function 'file-exists-p)
+             (lambda (file)
+               (equal file "Track 1.mp3")))
+            ((symbol-function 'mp3-tag--read-json-with-mutagen)
              (lambda (_file) "{\"title\":\"Track 1\"}"))
-            ((symbol-function 'json-parse-string)
+            ((symbol-function 'json-read-from-string)
              (lambda (_json &rest _args)
                '((title . "Track 1")))))
     (should (equal (mp3-tag-read-file "Track 1.mp3")
@@ -169,6 +172,16 @@
     '(("Filename" "Album" "Title")
       ("1.mp3" "Album 1" "Track 1")
       ("2.mp3" "" "Track 2")))))
+
+(ert-deftest mp3-tag-drop-empty-columns-can-drop-every-data-column ()
+  "Check result shape is preserved when all data columns are empty."
+  (should
+   (equal
+    (mp3-tag--drop-empty-columns
+     '(("Album" "Composer")
+       ("" "")
+       ("" "")))
+    '(() () ()))))
 
 (ert-deftest mp3-tag-table-to-orgtbl-adds-hlines ()
   "Check Org table output includes hlines around the header and at the end."

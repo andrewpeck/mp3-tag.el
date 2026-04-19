@@ -212,8 +212,23 @@ to:
          (rows (cdr table)))
     (mapcar (lambda (row) (cl-mapcar #'cons headers row)) rows)))
 
+(defun mp3-tag--drop-empty-columns (table)
+  "Return TABLE with columns removed when all data cells are empty."
+  (let* ((columns (apply #'cl-mapcar #'list table))
+         (nonempty-columns
+          (cl-remove-if-not
+           (lambda (column)
+             (cl-some (lambda (cell)
+                        (not (string-empty-p cell)))
+                      (cdr column)))
+           columns)))
+    (if nonempty-columns
+        (apply #'cl-mapcar #'list nonempty-columns)
+      (make-list (length table) nil))))
+
 (defun mp3-tag--table-to-orgtbl (table)
   "Converts an mp3-tag TABLE to and Org-mode table."
+  (setq table (mp3-tag--drop-empty-columns table))
   (orgtbl-to-orgtbl
    (append '(hline)
            (list (car table) 'hline)
