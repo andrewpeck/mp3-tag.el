@@ -152,6 +152,7 @@ Requires python3 and mutagen to be installed."
             (cl-remove-if (lambda (pair)
                             (let ((field (symbol-name (car pair))))
                               (or (string-prefix-p "TSSE" field)
+                                  (string-prefix-p "APIC:" field)
                                   (string-prefix-p "TXXX:" field)
                                   (string-prefix-p "PRIV:" field))))
                           track)) tracks))
