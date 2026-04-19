@@ -44,8 +44,8 @@
   "Check `mp3-tag-read-file' adds FILE to the returned alist."
   (cl-letf (((symbol-function 'mp3-tag--read-json-with-mutagen)
              (lambda (_file) "{\"title\":\"Track 1\"}"))
-            ((symbol-function 'json-read-from-string)
-             (lambda (_json)
+            ((symbol-function 'json-parse-string)
+             (lambda (_json &rest _args)
                '((title . "Track 1")))))
     (should (equal (mp3-tag-read-file "Track 1.mp3")
                    '((filename . "Track 1.mp3")
