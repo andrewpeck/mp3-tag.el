@@ -222,15 +222,13 @@ to:
   "Make a mp3-tag buffer."
   (generate-new-buffer (format "*mp3-tag: %s" default-directory)))
 
-(defun mp3-tag--edit-files (files)
-  "Make a mp3-tag buffer to edit FILES."
-  (let ((edit-buffer   (generate-new-buffer (format "*mp3-tag: %s" default-directory))))
+(defun mp3-tag--edit-table (table)
+  "Make a mp3-tag buffer to edit TABLE."
+  (let ((edit-buffer (generate-new-buffer (format "*mp3-tag: %s" default-directory))))
     (pop-to-buffer edit-buffer)
     (org-mode)
     (mp3-tag-mode)
-    (insert (mp3-tag--table-to-orgtbl
-             (mp3-tag--alist-to-table
-              (mp3-tag-read-files files))))))
+    (insert (mp3-tag--table-to-orgtbl table))))
 
 (defun mp3-tag--get-marked-dired-files ()
   "Retrieve a list of marked MP3 files from the current Dired buffer.
@@ -242,10 +240,12 @@ Returns a list of filenames that match the `.mp3` extension."
 (defun mp3-tag-edit ()
   "Open an editable tag buffer for MP3 files in the current context."
   (interactive)
-  (mp3-tag--edit-files
-   (or (mp3-tag--get-marked-dired-files)
-       (mapcar #'file-name-nondirectory
-               (directory-files default-directory t "\\.mp3$" nil)))))
+  (let* ((files (or (mp3-tag--get-marked-dired-files)
+                         (mapcar #'file-name-nondirectory
+                                 (directory-files default-directory t "\\.mp3$" nil))))
+              (alist  (mp3-tag-read-files files))
+              (table (mp3-tag--alist-to-table alist)))
+    (mp3-tag--edit-table table)))
 
 (defun mp3-tag-update ()
   "Update MP3 tags based on the current org table.

@@ -29,9 +29,16 @@
                (should-not (funcall filter "/tmp/a.flac"))
                (unless error
                  '("/tmp/a.mp3"))))
-            ((symbol-function 'mp3-tag--edit-files)
-             (lambda (&rest files) files)))
-    (should (equal (mp3-tag-edit) '(("/tmp/a.mp3"))))))
+            ((symbol-function 'mp3-tag-read-files)
+             (lambda (files)
+               (should (equal files '("/tmp/a.mp3")))
+               '(((filename . "/tmp/a.mp3")
+                  (TIT2 . "Track 1")))))
+            ((symbol-function 'mp3-tag--edit-table)
+             (lambda (table) table)))
+    (should (equal (mp3-tag-edit)
+                   '(("Filename" "Title")
+                     ("/tmp/a.mp3" "Track 1"))))))
 
 (ert-deftest mp3-tag-read-file-includes-filename ()
   "Check `mp3-tag-read-file' adds FILE to the returned alist."
@@ -151,6 +158,18 @@
                      ("2.mp3" "" "" "Other" "Happy" "2" "")
                      ("3.mp3" "Album 3" "Track 3" "Other" "Happy" "3" "1994"))))))
 
+(ert-deftest mp3-tag-drop-empty-columns-removes-all-empty-columns ()
+  "Check columns with only empty data cells are removed."
+  (should
+   (equal
+    (mp3-tag--drop-empty-columns
+     '(("Filename" "Album" "Composer" "Title")
+       ("1.mp3" "Album 1" "" "Track 1")
+       ("2.mp3" "" "" "Track 2")))
+    '(("Filename" "Album" "Title")
+      ("1.mp3" "Album 1" "Track 1")
+      ("2.mp3" "" "Track 2")))))
+
 (ert-deftest mp3-tag-table-to-orgtbl-adds-hlines ()
   "Check Org table output includes hlines around the header and at the end."
   (let ((table '(("title" "artist")
@@ -158,5 +177,14 @@
                  ("Track 2" "Artist"))))
     (should (equal (mp3-tag--table-to-orgtbl table)
                    "|---------+--------|\n| title   | artist |\n|---------+--------|\n| Track 1 | Artist |\n| Track 2 | Artist |\n|---------+--------|"))))
+
+(ert-deftest mp3-tag-table-to-orgtbl-drops-all-empty-columns ()
+  "Check Org table rendering omits columns whose values are all empty."
+  (let ((table '(("Filename" "Album" "Composer" "Title")
+                 ("1.mp3" "Album 1" "" "Track 1")
+                 ("2.mp3" "" "" "Track 2"))))
+    (should-not (string-match-p "Composer" (mp3-tag--table-to-orgtbl table)))
+    (should (string-match-p "Filename" (mp3-tag--table-to-orgtbl table)))
+    (should (string-match-p "Title" (mp3-tag--table-to-orgtbl table)))))
 
 ;;; test-mp3-tag.el ends here
