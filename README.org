@@ -1,0 +1,43 @@
+#+title: mp3-tag.el
+
+* Overview
+
+~mp3-tag.el~ is a small Emacs package for editing MP3 ID3 tags in an Org table.
+It reads and writes tags through Python + Mutagen, then presents the tags in a
+temporary Org buffer for quick batch editing.
+
+This package is hand written with regression tests added by AI.
+
+* Requirements
+
+- Emacs 27.1+
+- Org
+- Python 3
+- Mutagen (python 3 library)
+
+* Usage
+
+Load the package, then run:
+
+#+begin_src elisp
+(require 'mp3-tag)
+#+end_src
+
+From a directory of MP3 files, run:
+
+#+begin_src elisp
+M-x mp3-tag-edit
+#+end_src
+
+This opens an Org table showing the selected files and their tags. Edit the
+cells, then press ~C-c C-c~ to write the changes back to disk.
+
+In Dired, ~mp3-tag-edit~ uses the marked ~.mp3~ files. Outside Dired, it uses
+all ~.mp3~ files in the current directory.
+
+* Notes
+
+- Raw ID3 names are shown with readable headers in the table, for example
+  ~TALB~ becomes ~Album~ and ~TIT2~ becomes ~Title~.
+- The ~Filename~ column is used to identify which file to update. For now DO NOT change the file name. Support for editing filenames is forthcoming...
+- Private frames are filtered out when reading and writing tags. They will not be modified.
