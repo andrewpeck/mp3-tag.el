@@ -148,8 +148,10 @@ Requires python3 and mutagen to be installed."
   "Remove all fields beginning with id3v2_priv from a list TRACKS."
   (mapcar (lambda (track)
             (cl-remove-if (lambda (pair)
-                            (string-prefix-p "PRIV:"
-                                             (symbol-name (car pair))))
+                            (let ((field (symbol-name (car pair))))
+                              (or (string-prefix-p "TSSE" field)
+                                  (string-prefix-p "TXXX:" field)
+                                  (string-prefix-p "PRIV:" field))))
                           track)) tracks))
 
 (defun mp3-tag-read-files (files)
