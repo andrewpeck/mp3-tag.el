@@ -139,6 +139,8 @@
   "Read ID3 tags from an MP3 FILE and return them as an alist.
 
 Requires python3 and mutagen to be installed."
+  (unless (file-exists-p file)
+    (error "File `%s` not found!" file))
   (cons
    (cons 'filename file)
    (json-read-from-string
