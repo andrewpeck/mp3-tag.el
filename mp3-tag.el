@@ -255,6 +255,7 @@ Returns a list of filenames that match the `.mp3` extension."
                           (lambda (filename)
                             (string-match-p "\\.mp3\\'" filename))))
 
+;;;###autoload
 (defun mp3-tag-edit ()
   "Open an editable tag buffer for MP3 files in the current context."
   (interactive)
